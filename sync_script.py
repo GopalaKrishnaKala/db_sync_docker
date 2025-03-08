@@ -81,6 +81,30 @@ def get_table_hash(cursor, table_name):
     
     return hash_obj.hexdigest()  # Return unique hash of the table
 
+def show_first_5_rows():
+    """Fetch and display the first 5 rows from both db1 and db2."""
+    conn1 = connect_db(DB1_CONFIG)
+    conn2 = connect_db(DB2_CONFIG)
+    cursor1 = conn1.cursor()
+    cursor2 = conn2.cursor()
+
+    print("\n🔍 First 5 rows from db1:")
+    cursor1.execute("SELECT * FROM users ORDER BY id LIMIT 5;")
+    rows1 = cursor1.fetchall()
+    for row in rows1:
+        print(row)
+
+    print("\n🔍 First 5 rows from db2:")
+    cursor2.execute("SELECT * FROM users ORDER BY id LIMIT 5;")
+    rows2 = cursor2.fetchall()
+    for row in rows2:
+        print(row)
+
+    cursor1.close()
+    cursor2.close()
+    conn1.close()
+    conn2.close()
+
 def verify_sync():
     """Step 1: Verify row count, Step 2: Verify hash of both tables."""
     
@@ -121,3 +145,4 @@ time.sleep(5)  # Wait for databases to be ready
 insert_data()
 sync_data()
 verify_sync()
+show_first_5_rows()  # Display first 5 rows from both databases
