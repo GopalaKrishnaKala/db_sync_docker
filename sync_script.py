@@ -7,7 +7,7 @@ DB1_CONFIG = {
     "dbname": "db1",
     "user": "user1",
     "password": "password1",
-    "host": "localhost",
+    "host": "localhost",  # Use 'localhost' outside Docker
     "port": "5432",
 }
 
@@ -22,6 +22,52 @@ DB2_CONFIG = {
 def connect_db(config):
     """Connect to PostgreSQL database."""
     return psycopg2.connect(**config)
+
+def insert_data():
+    """Insert 100 rows into db1.users."""
+    conn = connect_db(DB1_CONFIG)
+    cursor = conn.cursor()
+    
+    cursor.execute("DELETE FROM users;")  # Clear old data
+    for i in range(1, 101):
+        cursor.execute("INSERT INTO users (name) VALUES (%s);", (f"User {i}",))
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+    print("[✓] Inserted 100 rows into db1")
+
+def sync_data():
+    """Sync data from db1 to db2 without duplication."""
+    conn1 = connect_db(DB1_CONFIG)
+    conn2 = connect_db(DB2_CONFIG)
+    cursor1 = conn1.cursor()
+    cursor2 = conn2.cursor()
+
+    # Ensure 'users' table exists in db2
+    cursor2.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(100) NOT NULL
+        );
+    """)
+
+    # ✅ Step 1: Clear existing data in db2 to prevent duplicates
+    cursor2.execute("DELETE FROM users;")
+
+    # ✅ Step 2: Fetch all rows from db1 and insert into db2
+    cursor1.execute("SELECT * FROM users;")
+    rows = cursor1.fetchall()
+
+    # ✅ Step 3: Insert rows into db2 with conflict handling
+    cursor2.executemany("INSERT INTO users (id, name) VALUES (%s, %s) ON CONFLICT (id) DO NOTHING;", rows)
+
+    conn2.commit()
+    cursor1.close()
+    cursor2.close()
+    conn1.close()
+    conn2.close()
+    print("[✓] Synchronized data from db1 to db2 (without duplicates)")
 
 def get_table_hash(cursor, table_name):
     """Compute a hashset of the entire table to verify row integrity."""
@@ -70,5 +116,8 @@ def verify_sync():
     conn1.close()
     conn2.close()
 
-# Run verification
+# Run full pipeline
+time.sleep(5)  # Wait for databases to be ready
+insert_data()
+sync_data()
 verify_sync()
