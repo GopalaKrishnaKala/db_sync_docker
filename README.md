@@ -19,7 +19,7 @@
 	- Version is 3.8
 	- Two database services (db1 and db2)
 	- They both use Postgres:15
-	- Container anmes used are: database_1 and database_2
+	- Containers used are: database_1 and database_2
 	- They restart when there is a failure
 	- Port mapping used is 5433:5432
 	- db1 executes the init.sql script and db2 syncs the data from db1
@@ -36,6 +36,7 @@ cd db_sync_docker
 docker-compose up -d
 - With this container for database1 and database2 will be up and running.
 - Note: If docker-compose up -d fails, ensure Docker is running. (Use the command "docker ps" to verify if the docker is up and running)
+- Note: If you get any warning, please ignore it.
 
 ### 3. Run the python script
 python sync_script.py
