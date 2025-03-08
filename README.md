@@ -46,6 +46,8 @@ python sync_script.py
 	- 3. Verifies the sync:
 		- 3.1 Checks row count
 		- 3.2 Hash verification to check if both the tables are identical (Verifies data consistency and integrity by computing and comparing the hash of the tables).
+		- 3.3 If the data sync is correct, the follwoing message will be printed: "Hash verification successful: Both tables have identical data" else: "Hash mismatch: Data in db1 and db2 are different" will be displayed.
+		- 3.4 Similar for row count as well: "Row count matches: 100 rows in both db1 and db2" else "Row count mismatch: db1 has 100, db2 has {count2}" (Here count2 is row count of db2)
 	- 4. Display the First 5 rows from db1 and db2 to view the data
 
 ### 4. Tear down the database instances
